@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drama China - YouTube Edition</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#121212; color:#e0e0e0; }
+  header { background:#1f1f1f; color:white; padding:20px; text-align:center; font-size:28px; font-weight:bold; }
+  .search-bar { padding:15px; text-align:center; background:#1f1f1f; }
+  .search-bar input { width:60%; padding:10px; font-size:16px; border-radius:8px; border:none; outline:none; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:25px; padding:20px; }
+  .card { background:#1e1e1e; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.3s, box-shadow 0.3s; }
+  .card:hover { transform:scale(1.05); box-shadow:0 6px 20px rgba(0,0,0,0.7); }
+  .card img { width:100%; height:300px; object-fit:cover; }
+  .card h3 { margin:10px; font-size:18px; color:#ffffff; }
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:100; }
+  .modal-content { background:#1f1f1f; padding:20px; border-radius:12px; width:90%; max-width:600px; text-align:center; position:relative; color:#e0e0e0; }
+  .modal-content img { width:100%; height:auto; border-radius:8px; margin-bottom:15px; }
+  .close { position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; color:#ffffff; }
+  .btn { display:inline-block; padding:12px 25px; margin-top:15px; background:#bb86fc; color:#121212; text-decoration:none; border-radius:8px; font-weight:bold; transition:background 0.3s; }
+  .btn:hover { background:#9b59b6; }
+</style>
+</head>
+<body>
+
+<header>Drama China - YouTube Edition</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="Cari drama...">
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" id="close">&times;</span>
+    <h2 id="modal-title"></h2>
+    <img id="modal-img" src="" alt="">
+    <p id="modal-desc"></p>
+    <a id="modal-link" href="#" target="_blank" class="btn">Tonton</a>
+  </div>
+</div>
+ <script>
+const dramas = [
+  {title:"Hidden Love", poster:"https://i.ytimg.com/vi/jHkFqVqA1YU/maxresdefault.jpg", description:"Drama Hidden Love episode 1", link:"https://www.youtube.com/watch?v=jHkFqVqA1YU"},
+  {title:"Soul Land", poster:"https://i.ytimg.com/vi/Nl8Z4r2Xeak/maxresdefault.jpg", description:"Petualangan Tang San di dunia roh", link:"https://www.youtube.com/watch?v=Nl8Z4r2Xeak"},
+  {title:"Battle Through the Heavens", poster:"https://i.ytimg.com/vi/0G9P3V4pFZQ/maxresdefault.jpg", description:"Xiao Yan berjuang untuk menjadi kuat", link:"https://www.youtube.com/watch?v=0G9P3V4pFZQ"},
+  {title:"Speed Love", poster:"https://i.ytimg.com/vi/2vWk5hLrB1U/maxresdefault.jpg", description:"Romansa cepat penuh drama", link:"https://www.youtube.com/watch?v=2vWk5hLrB1U"},
+  {title:"Martial Universe", poster:"https://i.ytimg.com/vi/5vF6H_PQ8s0/maxresdefault.jpg", description:"Perjalanan Lin Dong menjadi legenda", link:"https://www.youtube.com/watch?v=5vF6H_PQ8s0"},
+  {title:"Douluo Continent", poster:"https://i.ytimg.com/vi/x9c3Ff1cQ0E/maxresdefault.jpg", description:"Tang San kembali di dunia lain", link:"https://www.youtube.com/watch?v=x9c3Ff1cQ0E"},
+  {title:"The King's Avatar", poster:"https://i.ytimg.com/vi/4Kk4k1cErsk/maxresdefault.jpg", description:"Cerita esports penuh strategi", link:"https://www.youtube.com/watch?v=4Kk4k1cErsk"},
+  {title:"Full Time Magister", poster:"https://i.ytimg.com/vi/7F4K1hGQ2A4/maxresdefault.jpg", description:"Petualangan akademik dan kekuatan", link:"https://www.youtube.com/watch?v=7F4K1hGQ2A4"},
+  {title:"The Great Ruler", poster:"https://i.ytimg.com/vi/3J8kL6mP8Ds/maxresdefault.jpg", description:"Menguasai dunia dengan tekad kuat", link:"https://www.youtube.com/watch?v=3J8kL6mP8Ds"},
+  {title:"Legend of Fei", poster:"https://i.ytimg.com/vi/1F5K8kQ9G5E/maxresdefault.jpg", description:"Xiao Fei berjuang untuk keadilan", link:"https://www.youtube.com/watch?v=1F5K8kQ9G5E"},
+  {title:"Heaven Official's Blessing", poster:"https://i.ytimg.com/vi/Ht4v0x3FJqY/maxresdefault.jpg", description:"Xie Lian dalam perjalanan panjang", link:"https://www.youtube.com/watch?v=Ht4v0x3FJqY"},
+  {title:"Legend of Yunxi", poster:"https://i.ytimg.com/vi/aP3jY7sGQ2E/maxresdefault.jpg", description:"Romansa dan intrik kerajaan", link:"https://www.youtube.com/watch?v=aP3jY7sGQ2E"},
+  {title:"The Untamed", poster:"https://i.ytimg.com/vi/8F6k4gR2N1U/maxresdefault.jpg", description:"Cerita persaudaraan dan petualangan", link:"https://www.youtube.com/watch?v=8F6k4gR2N1U"},
+  {title:"Ashes of Love", poster:"https://i.ytimg.com/vi/6Vj9K4pX2Rk/maxresdefault.jpg", description:"Romansa dan takdir", link:"https://www.youtube.com/watch?v=6Vj9K4pX2Rk"},
+  {title:"Eternal Love", poster:"https://i.ytimg.com/vi/5Hk7L1qY8eU/maxresdefault.jpg", description:"Cinta melintasi zaman", link:"https://www.youtube.com/watch?v=5Hk7L1qY8eU"},
+  {title:"Love and Redemption", poster:"https://i.ytimg.com/vi/3F4k7gX2A1Q/maxresdefault.jpg", description:"Perjalanan cinta dan balas dendam", link:"https://www.youtube.com/watch?v=3F4k7gX2A1Q"},
+  {title:"Ashes of Love 2", poster:"https://i.ytimg.com/vi/2Kk5hGQ8F4E/maxresdefault.jpg", description:"Sekuel romansa dan konflik", link:"https://www.youtube.com/watch?v=2Kk5hGQ8F4E"},
+  {title:"The Legend of Xiao Chuo", poster:"https://i.ytimg.com/vi/9F5k3hL2P8Q/maxresdefault.jpg", description:"Sejarah dan intrik kerajaan", link:"https://www.youtube.com/watch?v=9F5k3hL2P8Q"},
+  {title:"Joy of Life", poster:"https://i.ytimg.com/vi/4F6k7hQ2R1E/maxresdefault.jpg", description:"Petualangan dan strategi kerajaan", link:"https://www.youtube.com/watch?v=4F6k7hQ2R1E"},
+  {title:"The Blood of Youth", poster:"https://i.ytimg.com/vi/6F8k3hX1Q4U/maxresdefault.jpg", description:"Cerita persahabatan dan peperangan", link:"https://www.youtube.com/watch?v=6F8k3hX1Q4U"},
+  {title:"No Boundary", poster:"https://i.ytimg.com/vi/1F9k7hQ2R8E/maxresdefault.jpg", description:"Petualangan fantasi dan persaingan", link:"https://www.youtube.com/watch?v=1F9k7hQ2R8E"},
+  {title:"Immortal Samsara", poster:"https://i.ytimg.com/vi/3Hk7hP4Q5T/maxresdefault.jpg", description:"Drama fantasi romantis", link:"https://www.youtube.com/watch?v=3Hk7hP4Q5T"},
+  {title:"The Long Ballad", poster:"https://i.ytimg.com/vi/2Hk4hQ1R3E/maxresdefault.jpg", description:"Intrik dan balas dendam kerajaan", link:"https://www.youtube.com/watch?v=2Hk4hQ1R3E"},
+  {title:"Word of Honor", poster:"https://i.ytimg.com/vi/5Hk7L2Q1F8E/maxresdefault.jpg", description:"Persahabatan dan petualangan martial arts", link:"https://www.youtube.com/watch?v=5Hk7L2Q1F8E"},
+  {title:"Who Rules The World", poster:"https://i.ytimg.com/vi/1Hk4hQ2R5U/maxresdefault.jpg", description:"Cinta dan perang kerajaan", link:"https://www.youtube.com/watch?v=1Hk4hQ2R5U"},
+  {title:"The Oath of Love", poster:"https://i.ytimg.com/vi/3Hk7hQ2F6E/maxresdefault.jpg", description:"Romansa dokter dan pasien", link:"https://www.youtube.com/watch?v=3Hk7hQ2F6E"},
+  {title:"Go Go Squid", poster:"https://i.ytimg.com/vi/2Hk8hQ1R7E/maxresdefault.jpg", description:"Cinta dan esports", link:"https://www.youtube.com/watch?v=2Hk8hQ1R7E"},
+  {title:"My Heroic Husband", poster:"https://i.ytimg.com/vi/1F6k7hP4R8Q/maxresdefault.jpg", description:"Drama keluarga dan kekuatan", link:"https://www.youtube.com/watch?v=1F6k7hP4R8Q"},
+  {title:"Love Between Fairy and Devil", poster:"https://i.ytimg.com/vi/3Hk7hQ1T5E/maxresdefault.jpg", description:"Cinta dan sihir", link:"https://www.youtube.com/watch?v=3Hk7hQ1T5E"},
+  {title:"You Are My Glory", poster:"https://i.ytimg.com/vi/2Hk7hQ3R6U/maxresdefault.jpg", description:"Romansa selebriti dan game", link:"https://www.youtube.com/watch?v=2Hk7hQ3R6U"},
+  {title:"The Blue Whisper", poster:"https://i.ytimg.com/vi/1F8k7hQ2R9E/maxresdefault.jpg", description:"Cinta dan petualangan fantasy", link:"https://www.youtube.com/watch?v=1F8k7hQ2R9E"}
+];
+
+const grid = document.getElementById('grid');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalImg = document.getElementById('modal-img');
+const modalDesc = document.getElementById('modal-desc');
+const modalLink = document.getElementById('modal-link');
+const closeBtn = document.getElementById('close');
+const searchInput = document.getElementById('search');
+
+function renderDramas(list) {
+  grid.innerHTML = '';
+  list.forEach(drama => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<img src="${drama.poster}" alt="${drama.title}"><h3>${drama.title}</h3>`;
+    card.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      modalTitle.textContent = drama.title;
+      modalImg.src = drama.poster;
+      modalDesc.textContent = drama.description;
+      modalLink.href = drama.link;
+    });
+    grid.appendChild(card);
+  });
+}
+
+searchInput.addEventListener('input', () => {
+  const filtered = dramas.filter(d => d.title.toLowerCase().includes(searchInput.value.toLowerCase()));
+  renderDramas(filtered);
+});
+
+closeBtn.addEventListener('click', () => modal.style.display = 'none');
+window.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+
+renderDramas(dramas);
+</script>
+</body>
+  </html>
